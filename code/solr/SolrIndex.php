@@ -269,7 +269,8 @@ abstract class SolrIndex extends SearchIndex {
 
 		foreach ($this->getClasses() as $searchclass => $options) {
 			if ($searchclass == $class || ($options['include_children'] && is_subclass_of($class, $searchclass))) {
-				$docs[] = $this->_addAs($object, $searchclass, $options);
+				$base = ClassInfo::baseDataClass($searchclass);
+				$docs[] = $this->_addAs($object, $base, $options);
 			}
 		}
 
@@ -405,7 +406,7 @@ abstract class SolrIndex extends SearchIndex {
 			$fq[] = ($missing ? "+{$field}:[* TO *] " : '') . '-('.implode(' ', $excludeq).')';
 		}
 
-		if(!headers_sent()) {
+		if(!headers_sent() && !Director::isLive()) {
 			if ($q) header('X-Query: '.implode(' ', $q));
 			if ($fq) header('X-Filters: "'.implode('", "', $fq).'"');
 		}
